@@ -253,6 +253,7 @@ public class TranspositionCipher {
     /**
      * Cardano Grille Cipher
      */
+
     private static String cardanoGrilleCipher(String text) {
         System.out.println("Шифр решітки Кардано");
         System.out.print("Введіть розмір решітки (N для квадрата NxN, N має бути парним): ");
@@ -266,7 +267,7 @@ public class TranspositionCipher {
         // Number of holes in each quadrant
         int holesPerQuadrant = size * size / 4;
 
-        // Create the grille
+        // Create the grille - only first quadrant
         boolean[][] grille = new boolean[size][size];
         System.out.println("Введіть координати отворів у решітці (формат: рядок,стовпець)");
         System.out.println("Введіть " + holesPerQuadrant + " координат (по одній на рядок), натисніть Enter після кожної:");
@@ -284,20 +285,6 @@ public class TranspositionCipher {
             }
         }
 
-        // Generate the other quadrants of the grille by rotating
-        for (int i = 0; i < size / 2; i++) {
-            for (int j = 0; j < size / 2; j++) {
-                if (grille[i][j]) {
-                    // Rotate 90 degrees
-                    grille[j][size - 1 - i] = true;
-                    // Rotate 180 degrees
-                    grille[size - 1 - i][size - 1 - j] = true;
-                    // Rotate 270 degrees
-                    grille[size - 1 - j][i] = true;
-                }
-            }
-        }
-
         // Pad text if necessary
         while (text.length() < size * size) {
             text += "Ь"; // Padding with 'Ь'
@@ -305,14 +292,24 @@ public class TranspositionCipher {
 
         // Use the grille to create the encrypted text
         char[][] matrix = new char[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                matrix[i][j] = 'Ь'; // Initialize with padding character
+            }
+        }
+
         int textIndex = 0;
 
-        // Place characters through the grille
+        // Place characters through the grille with 4 rotations
         for (int rotation = 0; rotation < 4; rotation++) {
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
                     if (grille[i][j]) {
-                        matrix[i][j] = text.charAt(textIndex++);
+                        if (textIndex < text.length()) {
+                            matrix[i][j] = text.charAt(textIndex++);
+                        } else {
+                            matrix[i][j] = 'Ь'; // Use padding if text is too short
+                        }
                     }
                 }
             }
